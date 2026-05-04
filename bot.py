@@ -21,7 +21,7 @@ def animated_loading():
     print(PINK + " Моя миссия — помогать тебе управлять ПК" + Style.RESET_ALL)
 
 # Инициализация бота
-bot = Bot(token=8550356522:AAE2y0LvFHKq-XjuZAAOG3ZXXoprnYc6XF4)
+bot = Bot(8550356522:AAE2y0LvFHKq-XjuZAAOG3ZXXoprnYc6XF4)
 dp = Dispatcher(storage=MemoryStorage())
 authorized_users = set()
 
