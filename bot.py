@@ -1,6 +1,5 @@
-import os
 import asyncio
-from colorama import Fore, Style, init as colorama_init
+from colorama import Style, init as colorama_init
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, CallbackQuery
@@ -13,40 +12,34 @@ from commands import (
     open_chrome, open_telegram, close_telegram
 )
 
-# Цветной вывод
+# ====== INIT ======
 PINK = '\033[95m'
+authorized_users = set()
 
 
 def animated_loading():
     colorama_init()
-    print(PINK + " GEEK_BOT Version 1.0 " + Style.RESET_ALL)
-    print(PINK + " Создатели: GEEK" + Style.RESET_ALL)
-    print(PINK + " Моя миссия — помогать тебе управлять ПК" + Style.RESET_ALL)
+    print(PINK + "GEEK_BOT v1.0" + Style.RESET_ALL)
+    print(PINK + "Запуск..." + Style.RESET_ALL)
 
 
-# Инициализация бота (ИСПРАВЛЕНО)
-bot = Bot(token=8550356522:AAFViUadFM3kcldMtIhwD_rkCk96jsafOqI)
+# ====== BOT ======
+bot = Bot(token=8550356522:AAEvWF2zclndI1pWvl4zG9S1oz8L_LJY1yk)
 dp = Dispatcher(storage=MemoryStorage())
 
-authorized_users = set()
 
-
-# START
+# ====== START ======
 @dp.message(F.text == "/start")
 async def start_handler(message: Message):
-    await message.answer_sticker(
-        "CAACAgIAAxkBAAEP1-xoTJKwEkI_hZHm6Q4gGd31ctjCtgACLBkAAh7RQElE4DTtGCLf-TYE"
-    )
-
     await message.answer(
-        "💖 Привет-привет! 💖\n"
-        "Я — Ася, твоя цифровая помощница! 🧸\n\n"
-        "🔑 Введи пароль для доступа ✨"
+        "💖 Привет!\n"
+        "Я бот для управления ПК.\n\n"
+        "🔐 Введите пароль:"
     )
 
 
-# ПАРОЛЬ
-@dp.message()
+# ====== PASSWORD ======
+@dp.message(F.text)
 async def password_handler(message: Message):
     user_id = message.from_user.id
     text = message.text
@@ -54,44 +47,40 @@ async def password_handler(message: Message):
     if not text:
         return
 
+    # уже авторизован
     if user_id in authorized_users:
         return
 
+    # проверка пароля
     if text == PASSWORD:
         authorized_users.add(user_id)
 
-        await message.answer_sticker(
-            "CAACAgIAAxkBAAEP1-RoTJJ38ZEisz70JJb-jG3noNrcHQACvEMAAgjWWUv_LfJD81F1fDYE"
-        )
-
         await message.answer(
-            "🔓 Доступ разрешен!\n\n"
-            "🖥️ Управление ПК активно",
+            "🔓 Доступ разрешён!",
             reply_markup=get_main_menu()
         )
     else:
-        await message.answer_sticker(
-            "CAACAgIAAxkBAAEP1-hoTJKToXWiAAEmfwZya_YzpK5nyx8AAjY4AAKO87FLCdowuSW13BU2BA"
-        )
-
-        await message.answer("🚫 Неверный пароль")
+        await message.answer("❌ Неверный пароль")
 
 
-# AUTH CHECK
+# ====== CHECK AUTH ======
 async def check_auth(callback: CallbackQuery) -> bool:
     if callback.from_user.id not in authorized_users:
-        await callback.message.answer("🔐 Введите пароль через /start")
-        await callback.answer()
+        await callback.answer("Нет доступа", show_alert=True)
         return False
     return True
 
 
-# ===== МЕНЮ =====
+# ====== NAVIGATION ======
 @dp.callback_query(F.data == "back_main")
 async def back_main(callback: CallbackQuery):
     if not await check_auth(callback):
         return
-    await callback.message.edit_text("Главное меню:", reply_markup=get_main_menu())
+
+    await callback.message.edit_text(
+        "Главное меню:",
+        reply_markup=get_main_menu()
+    )
     await callback.answer()
 
 
@@ -99,7 +88,11 @@ async def back_main(callback: CallbackQuery):
 async def control_pc(callback: CallbackQuery):
     if not await check_auth(callback):
         return
-    await callback.message.edit_text("Управление ПК:", reply_markup=get_control_menu())
+
+    await callback.message.edit_text(
+        "Управление ПК:",
+        reply_markup=get_control_menu()
+    )
     await callback.answer()
 
 
@@ -107,24 +100,21 @@ async def control_pc(callback: CallbackQuery):
 async def programs(callback: CallbackQuery):
     if not await check_auth(callback):
         return
-    await callback.message.edit_text("Программы:", reply_markup=get_programs_menu())
+
+    await callback.message.edit_text(
+        "Программы:",
+        reply_markup=get_programs_menu()
+    )
     await callback.answer()
 
 
-@dp.callback_query(F.data == "back_control")
-async def back_control(callback: CallbackQuery):
-    if not await check_auth(callback):
-        return
-    await callback.message.edit_text("Меню:", reply_markup=get_control_menu())
-    await callback.answer()
-
-
-# ===== ПИТАНИЕ ПК =====
+# ====== POWER ======
 @dp.callback_query(F.data == "sleep")
 async def sleep_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
     await sleep_pc(callback)
+    await callback.answer()
 
 
 @dp.callback_query(F.data == "reboot")
@@ -132,6 +122,7 @@ async def reboot_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
     await reboot_pc(callback)
+    await callback.answer()
 
 
 @dp.callback_query(F.data == "shutdown")
@@ -139,14 +130,16 @@ async def shutdown_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
     await shutdown_pc(callback)
+    await callback.answer()
 
 
-# ===== ПРОГРАММЫ =====
+# ====== PROGRAMS ======
 @dp.callback_query(F.data == "chrome")
 async def chrome_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
     await open_chrome(callback)
+    await callback.answer()
 
 
 @dp.callback_query(F.data == "telegram")
@@ -154,6 +147,7 @@ async def telegram_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
     await open_telegram(callback)
+    await callback.answer()
 
 
 @dp.callback_query(F.data == "close_telegram")
@@ -161,26 +155,34 @@ async def close_telegram_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
     await close_telegram(callback)
+    await callback.answer()
 
 
-# ===== ТАЙМЕР =====
+# ====== TIMER ======
 @dp.callback_query(F.data.startswith("timer_"))
 async def timer_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
 
-    minutes = int(callback.data.split("_")[1])
-    await handle_timer(callback, minutes)
+    try:
+        minutes = int(callback.data.split("_")[1])
+        await handle_timer(callback, minutes)
+    except Exception as e:
+        await callback.message.answer(f"Ошибка таймера: {e}")
+
+    await callback.answer()
 
 
 @dp.callback_query(F.data == "cancel_timer")
 async def cancel_timer_handler(callback: CallbackQuery):
     if not await check_auth(callback):
         return
+
     await cancel_timer(callback)
+    await callback.answer()
 
 
-# ===== MAIN =====
+# ====== MAIN ======
 async def main():
     animated_loading()
     await dp.start_polling(bot)
