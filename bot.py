@@ -24,7 +24,7 @@ def animated_loading():
 
 
 # ====== BOT ======
-bot = Bot(token=8550356522:AAEvWF2zclndI1pWvl4zG9S1oz8L_LJY1yk)
+bot = Bot(token="8550356522:AAEvWF2zclndI1pWvl4zG9S1oz8L_LJY1yk")
 dp = Dispatcher(storage=MemoryStorage())
 
 
