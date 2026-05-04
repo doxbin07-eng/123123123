@@ -16,12 +16,12 @@ PINK = '\033[95m'
 
 def animated_loading():
     colorama_init()
-    print(PINK + " Asya_Bot  Version 1.0 " + Style.RESET_ALL)
-    print(PINK + " Создатели: vk.com/m_tech_studio" + Style.RESET_ALL)
+    print(PINK + " GEEK_BOT  Version 1.0 " + Style.RESET_ALL)
+    print(PINK + " Создатели: GEEK" + Style.RESET_ALL)
     print(PINK + " Моя миссия — помогать тебе управлять ПК" + Style.RESET_ALL)
 
 # Инициализация бота
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=8719014845:AAG1aKcqexe-JXhZcy0ply5E8NFMmlavbLA)
 dp = Dispatcher(storage=MemoryStorage())
 authorized_users = set()
 
